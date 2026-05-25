@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Trash Zero - Sistem Pengelolaan Sampah Digital</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+        background: #0f172a;
+        color: #f1f5f9;
+        overflow-x: hidden;
+    }
+
+    /* LOGIN & CARD STYLE */
+    .page {
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        background: linear-gradient(125deg, #0a0f1e 0%, #0f172a 100%);
+        position: relative;
+    }
+
+    .page::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: url('https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?q=80&w=1200&auto=format&fit=crop') center/cover no-repeat;
+        opacity: 0.2;
+        pointer-events: none;
+    }
+
+    .card {
+        width: 100%;
+        max-width: 460px;
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(18px);
+        border-radius: 2rem;
+        padding: 2rem 1.8rem;
+        box-shadow: 0 25px 45px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(34, 197, 94, 0.25);
+        transition: all 0.2s;
+    }
+
+    .logo {
+        font-size: 4rem;
+        text-align: center;
+        margin-bottom: 0.5rem;
+    }
+
+    .title {
+        text-align: center;
+        font-size: 2rem;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        background: linear-gradient(135deg, #bef264, #22c55e);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+
+    .subtitle {
+        text-align: center;
+        opacity: 0.8;
+        margin-bottom: 1.8rem;
+        font-size: 0.85rem;
+    }
+
+    .input-group {
+        margin-bottom: 1.2rem;
+    }
+
+    .input-group label {
+        display: block;
+        margin-bottom: 0.4rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+        letter-spacing: 0.3px;
+    }
+
+    .input-group input,
+    .input-group select {
+        width: 100%;
+        padding: 0.9rem 1rem;
+        border: none;
+        border-radius: 1.2rem;
+        background: rgba(255, 255, 255, 0.12);
+        color: white;
+        font-size: 0.95rem;
+        outline: none;
+        transition: 0.2s;
+    }
+
+    .input-group input:focus,
+    .input-group select:focus {
+        background: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 0 0 2px #22c55e;
+    }
+
+    .btn {
+        width: 100%;
+        padding: 0.9rem;
+        border: none;
+        border-radius: 2rem;
+        background: linear-gradient(95deg, #22c55e, #15803d);
+        color: white;
+        font-weight: bold;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: 0.2s;
+        margin-top: 0.5rem;
+        box-shadow: 0 6px 14px rgba(34, 197, 94, 0.3);
+    }
+
+    .btn:hover {
+        transform: scale(0.98);
+        background: linear-gradient(95deg, #16a34a, #166534);
+    }
+
+    .switch {
+        text-align: center;
+        margin-top: 1.3rem;
+        font-size: 0.85rem;
+        color: #86efac;
+        cursor: pointer;
+        font-weight: 500;
+    }
+
+    /* DASHBOARD */
+    #dashboard {
+        display: none;
+        background: #0f172a;
+        min-height: 100vh;
+        padding-bottom: 2rem;
+    }
+
+    .topbar {
+        padding: 1rem 1.5rem;
+        background: #0a0f1ecc;
+        backdrop-filter: blur(12px);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 1100;
+        border-bottom: 1px solid #22c55e30;
+    }
+
+    .topbar h2 {
+        font-size: 1.6rem;
+        background: linear-gradient(120deg, #e2e8f0, #86efac);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+
+    .logout {
+        background: #dc2626;
+        border: none;
+        padding: 0.5rem 1.2rem;
+        border-radius: 2rem;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+    }
+
+    .welcome-card {
+        margin: 1.2rem 1.5rem;
+        padding: 1.6rem 1.8rem;
+        border-radius: 2rem;
+        background: linear-gradient(125deg, #1e293b, #0f172a);
+        border-left: 6px solid #22c55e;
+        box-shadow: 0 12px 25px -10px black;
+    }
+
+    .role-badge {
+        display: inline-block;
+        background: #22c55e30;
+        padding: 0.3rem 1rem;
+        border-radius: 40px;
+        font-size: 0.75rem;
+        font-weight: bold;
+        margin-top: 0.8rem;
+    }
+
+    .stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        padding: 0 1.5rem 1rem;
+    }
+
+    .stat-box {
+        flex: 1;
+        background: #1e293b;
+        padding: 1.2rem;
+        border-radius: 1.6rem;
+        text-align: center;
+        border: 1px solid #334155;
+    }
+
+    .stat-box h3 {
+        font-size: 2rem;
+        color: #4ade80;
+    }
+
+    /* FEATURE GRID */
+    .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 1.2rem;
+        padding: 0 1.5rem;
+        margin: 1.2rem 0;
+    }
+
+    .feature-card {
+        background: #111827;
+        border-radius: 1.5rem;
+        padding: 1.3rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 1px solid #2d3a4e;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    }
+
+    .feature-card:hover {
+        transform: translateY(-4px);
+        background: #1e2a3a;
+        border-color: #22c55e;
+    }
+
+    .feature-icon {
+        font-size: 2.2rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .feature-title {
+        font-weight: bold;
+        font-size: 1.1rem;
+        margin: 0.5rem 0 0.2rem;
+        color: #facc15;
+    }
+
+    .feature-desc {
+        font-size: 0.75rem;
+        opacity: 0.8;
+    }
+
+    #map {
+        height: 460px;
+        margin: 1rem 1.5rem;
+        border-radius: 1.8rem;
+        overflow: hidden;
+        border: 2px solid #334155;
+        z-index: 1;
+    }
+
+    .legend {
+        padding: 0 1.5rem;
+        margin-top: 0.5rem;
+    }
+
+    .legend-title {
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+
+    .legend-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-right: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+    }
+
+    .pending { background: #f97316; }
+    .process { background: #3b82f6; }
+    .done { background: #22c55e; }
+
+    .flash {
+        position: fixed;
+        top: 18px;
+        right: 20px;
+        background: #22c55e;
+        color: #0c0e1a;
+        font-weight: bold;
+        padding: 14px 24px;
+        border-radius: 60px;
+        z-index: 9999;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        animation: fadeSlide 0.3s ease;
+    }
+
+    @keyframes fadeSlide {
+        from { opacity: 0; transform: translateX(40px);}
+        to { opacity: 1; transform: translateX(0);}
+    }
+
+    @media (max-width: 640px) {
+        .stats { flex-direction: column; }
+        .feature-grid { grid-template-columns: 1fr; }
+    }
+</style>
+</head>
+<body>
+
+<!-- LOGIN PAGE -->
+<div class="page" id="loginPage">
+    <div class="card">
+        <div class="logo">♻️🗑️</div>
+        <div class="title">Trash Zero</div>
+        <div class="subtitle">Sistem pelaporan & monitoring sampah berbasis smart location</div>
+
+        <div id="loginBox">
+            <div class="input-group"><label>📱 Nomor HP</label><input type="text" id="loginHP" placeholder="08xxxxxxxxxx"></div>
+            <div class="input-group"><label>🔒 Password</label><input type="password" id="loginPassword"></div>
+            <div class="input-group"><label>👥 Peran</label>
+                <select id="loginPeran">
+                    <option>Warga</option><option>Kepala Desa</option><option>Dinas Lingkungan Hidup</option>
+                </select>
+            </div>
+            <button class="btn" onclick="login()">🚀 MASUK KE DASHBOARD</button>
+            <div class="switch" onclick="toggleRegister()">✨ Belum punya akun? Registrasi Sekarang</div>
+        </div>
+
+        <div id="registerBox" style="display:none;">
+            <div class="input-group"><label>📞 Nomor HP</label><input type="text" id="regHP"></div>
+            <div class="input-group"><label>🧑 Nama Lengkap</label><input type="text" id="regNama"></div>
+            <div class="input-group"><label>🔐 Password</label><input type="password" id="regPassword"></div>
+            <div class="input-group"><label>👔 Peran</label><select id="regPeran"><option>Warga</option><option>Kepala Desa</option><option>Dinas Lingkungan Hidup</option></select></div>
+            <button class="btn" onclick="register()">📝 DAFTAR</button>
+            <div class="switch" onclick="toggleRegister()">↩️ Sudah punya akun? Login</div>
+        </div>
+    </div>
+</div>
+
+<!-- DASHBOARD UTAMA -->
+<div id="dashboard">
+    <div class="topbar">
+        <h2>♻️ Trash Zero | Smart Waste</h2>
+        <button class="logout" onclick="logout()">🚪 Keluar</button>
+    </div>
+    <div class="welcome-card">
+        <h2 id="welcomeText"></h2>
+        <p>🗺️ Laporan realtime, pantau titik sampah & aksi pengangkutan.</p>
+        <div class="role-badge" id="roleBadge"></div>
+    </div>
+    <div class="stats">
+        <div class="stat-box"><h3 id="totalLaporan">0</h3><p>Total Laporan</p></div>
+        <div class="stat-box"><h3 id="totalSelesai">0</h3><p>Selesai</p></div>
+        <div class="stat-box"><h3 id="filteredData">0</h3><p>Tampil Peta</p></div>
+    </div>
+
+    <!-- DYNAMIC FITUR GRID (BERDASARKAN PERAN) -->
+    <div id="featureContainer" class="feature-grid"></div>
+
+    <div id="map"></div>
+    <div class="legend">
+        <div class="legend-title">📌 Status titik sampah</div>
+        <div><span class="dot pending"></span> Pending   <span class="dot process"></span> Diproses   <span class="dot done"></span> Selesai</div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+    // ---------- Google Script Endpoint (Login/Regis mock, tapi tetap terintegrasi) ----------
+    const LOGIN_SCRIPT = "https://script.google.com/macros/s/AKfycbz_ixSVZWbh6G_8K4tyjiv1mgpgMLJMMeFimDsBm-p0m75N-5rOwV_pbcCxP4QMnRqU/exec";
+    const SHEET_JSON = "https://opensheet.elk.sh/16Uecp8DHNWQy5XBHyAjdFZkNFWjRLaLk6z3hiOzZuAo/Sheet1";
+
+    // Data simulasi user lokal (untuk keperluan demo cepat, jika endpoint gagal tetap bisa regist/login dasar)
+    let localUsers = JSON.parse(localStorage.getItem("trashzero_localusers")) || [];
+
+    function toggleRegister() {
+        const loginDiv = document.getElementById('loginBox');
+        const regDiv = document.getElementById('registerBox');
+        if (loginDiv.style.display !== 'none') {
+            loginDiv.style.display = 'none';
+            regDiv.style.display = 'block';
+        } else {
+            loginDiv.style.display = 'block';
+            regDiv.style.display = 'none';
+        }
+    }
+
+    async function register() {
+        const hp = document.getElementById('regHP').value.trim();
+        const nama = document.getElementById('regNama').value.trim();
+        const pass = document.getElementById('regPassword').value.trim();
+        const peran = document.getElementById('regPeran').value;
+        if(!hp || !nama || !pass) { showFlash("❌ Isi semua data!", true); return; }
+        // cek duplikat lokal
+        if(localUsers.find(u => u.nomorHP === hp)) { showFlash("❌ Nomor HP sudah terdaftar", true); return; }
+        const newUser = { nomorHP: hp, namaLengkap: nama, password: pass, peran: peran };
+        localUsers.push(newUser);
+        localStorage.setItem("trashzero_localusers", JSON.stringify(localUsers));
+        showFlash("✅ Registrasi berhasil! Silakan login.");
+        toggleRegister(); // pindah ke login
+        document.getElementById('regHP').value = '';
+        document.getElementById('regNama').value = '';
+        document.getElementById('regPassword').value = '';
+    }
+
+    async function login() {
+        const hp = document.getElementById('loginHP').value.trim();
+        const pass = document.getElementById('loginPassword').value.trim();
+        const peran = document.getElementById('loginPeran').value;
+        if(!hp || !pass) { showFlash("⚠️ Masukkan HP & Password", true); return; }
+
+        // coba ke google script dulu (opsional, biar tetap ada integrasi)
+        let success = false;
+        let userName = "";
+        try {
+            const response = await fetch(LOGIN_SCRIPT, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'login', nomorHP: hp, password: pass, peran: peran })
+            });
+            const result = await response.json();
+            if(result.status === 'success') {
+                success = true;
+                userName = result.nama;
+            }
+        } catch(e) { console.log("remote login skip, pakai lokal"); }
+
+        // Jika remote gagal, cek localUsers
+        if(!success) {
+            const found = localUsers.find(u => u.nomorHP === hp && u.password === pass && u.peran === peran);
+            if(found) {
+                success = true;
+                userName = found.namaLengkap;
+            }
+        }
+
+        if(success) {
+            localStorage.setItem('nama', userName);
+            localStorage.setItem('peran', peran);
+            localStorage.setItem('login_hp', hp);
+            showFlash(`🎉 Selamat datang, ${userName} (${peran})`);
+            setTimeout(() => {
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                document.getElementById('welcomeText').innerHTML = `Selamat datang, ${userName} 👋`;
+                document.getElementById('roleBadge').innerHTML = `Peran: ${peran}`;
+                loadMapAndFeatures();
+            }, 800);
+        } else {
+            showFlash("❌ Login gagal! Periksa HP/password/peran", true);
+        }
+    }
+
+    function logout() {
+        localStorage.clear();
+        location.reload();
+    }
+
+    function showFlash(msg, isError = false) {
+        const flashDiv = document.createElement('div');
+        flashDiv.className = 'flash';
+        flashDiv.style.background = isError ? '#dc2626' : '#22c55e';
+        flashDiv.style.color = 'white';
+        flashDiv.innerHTML = msg;
+        document.body.appendChild(flashDiv);
+        setTimeout(() => flashDiv.remove(), 2800);
+    }
+
+    // ======================= MENU DINAMIS BERDASARKAN PERAN =======================
+    function getFeaturesByRole(role) {
+        // Fitur dengan link sesuai permintaan
+        const allFeatures = {
+            // WAJIB ADA UNTUK WARGA
+            "Warga": [
+                { name: "📋 Pelaporan Sampah", desc: "Laporkan titik sampah baru", url: "https://trash-web.github.io/Input-laporan-sampah/", icon: "🗑️" },
+                { name: "⭐ Resik-Points", desc: "Tukar poin kebersihan", url: "https://www.historia.id/article/enam-korban-keris-mpu-gandring-dpo91", icon: "🎁" },
+                { name: "🤖 AI-Based Waste Classification", desc: "Klasifikasi sampah pintar", url: "https://trash-web.github.io/Ai-Trash/", icon: "🧠" },
+                { name: "🚛 Pelacakan Truk Live", desc: "Lacak armada pengangkut", url: "https://trash-web.github.io/Truck-Live/", icon: "📍" }
+            ],
+            "Kepala Desa": [
+                { name: "🚛 Pelacakan Truk Live", desc: "Monitoring truk sampah", url: "https://trash-web.github.io/Truck-Live/", icon: "🚛" },
+                { name: "⚡ Smart Routing Optimization", desc: "Optimasi rute pengangkutan", url: "https://trash-web.github.io/Smart-Truck/", icon: "🧭" },
+                { name: "📈 Progress Laporan", desc: "Lihat progress desa", url: "https://www.historia.id/articles/categories/olahraga", icon: "📊" }
+            ],
+            "Dinas Lingkungan Hidup": [
+                { name: "🚛 Pelacakan Truk Live", desc: "Full fleet monitoring", url: "https://trash-web.github.io/Truck-Live/", icon: "🚛" },
+                { name: "⚡ Smart Routing Optimization", desc: "Rute dinamis dinas", url: "https://trash-web.github.io/Smart-Truck/", icon: "⚙️" },
+                { name: "📑 Progress Laporan", desc: "Statistik wilayah", url: "https://www.historia.id/articles/categories/olahraga", icon: "📈" }
+            ]
+        };
+        if(role === "Kepala Desa") return allFeatures["Kepala Desa"];
+        if(role === "Dinas Lingkungan Hidup") return allFeatures["Dinas Lingkungan Hidup"];
+        return allFeatures["Warga"];
+    }
+
+    function renderFeatureButtons(role) {
+        const container = document.getElementById('featureContainer');
+        if(!container) return;
+        const features = getFeaturesByRole(role);
+        container.innerHTML = "";
+        features.forEach(f => {
+            const card = document.createElement('div');
+            card.className = 'feature-card';
+            card.onclick = () => { window.open(f.url, '_blank'); };
+            card.innerHTML = `
+                <div class="feature-icon">${f.icon}</div>
+                <div class="feature-title">${f.name}</div>
+                <div class="feature-desc">${f.desc}</div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    // ======================= LOAD MAP DAN DATA GOOGLE SHEET =======================
+    let currentMap = null;
+
+    async function loadMapAndFeatures() {
+        const role = localStorage.getItem('peran');
+        if(!role) return;
+
+        // render tombol fitur dinamis
+        renderFeatureButtons(role);
+
+        // init map (jika sudah ada, remove)
+        if(currentMap) {
+            currentMap.remove();
+        }
+        const map = L.map('map').setView([-7.9, 112.6], 10);
+        currentMap = map;
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        let data = [];
+        try {
+            const resp = await fetch(SHEET_JSON);
+            data = await resp.json();
+        } catch(e) {
+            console.warn("gagal fetch sheet, gunakan data dummy");
+            data = [];
+        }
+
+        document.getElementById('totalLaporan').innerHTML = data.length;
+        let selesaiCount = 0;
+        let tampilDataCount = 0;
+
+        for(let item of data) {
+            const lat = parseFloat(item.Latitude);
+            const lng = parseFloat(item.Longitude);
+            if(isNaN(lat) || isNaN(lng)) continue;
+            const berat = parseFloat(item.Perkiraan_Berat_Kg) || 0;
+            let showMarker = false;
+
+            // Filter sesuai role (berat: KepalaDesa 100-900, DLH >=900, warga semua)
+            if(role === "Warga") {
+                showMarker = true;
+            } else if(role === "Kepala Desa") {
+                if(berat >= 100 && berat <= 900) showMarker = true;
+            } else if(role === "Dinas Lingkungan Hidup") {
+                if(berat >= 900) showMarker = true;
+            }
+
+            if(!showMarker) continue;
+            tampilDataCount++;
+            let markerColor = '#f97316'; // orange pending
+            const status = item.Status;
+            if(status === 'Diproses') markerColor = '#3b82f6';
+            if(status === 'Selesai') {
+                markerColor = '#22c55e';
+                selesaiCount++;
+            }
+
+            const circle = L.circleMarker([lat, lng], {
+                radius: 9,
+                fillColor: markerColor,
+                color: '#ffffff',
+                weight: 1.8,
+                fillOpacity: 0.85
+            }).addTo(map);
+
+            const popupHtml = `
+                <div style="font-family:sans; min-width:180px;">
+                    <strong>🧾 ${item.Kategori_Sampah || 'Sampah'}</strong><br>
+                    🆔 ID: ${item.ID_Laporan || '-'}<br>
+                    👤 Pelapor: ${item.Nama_Pelapor || '-'}<br>
+                    ⚖️ Berat: ${item.Perkiraan_Berat_Kg} kg<br>
+                    📌 Status: ${item.Status || 'Pending'}<br>
+                    💬 Komentar: ${item.Komentar_Petugas || '-'}<br>
+                    📞 No HP: ${item.Nomor_Handphone || '-'}
+                </div>
+            `;
+            circle.bindPopup(popupHtml);
+        }
+
+        if(tampilDataCount === 0 && data.length > 0) {
+            // kalau tidak ada marker karena filter berat
+            const infoLayer = L.tileLayer('').addTo(map);
+            map.setView([-7.5, 112.2], 8);
+            L.popup()
+                .setLatLng([-7.9,112.6])
+                .setContent("⚠️ Tidak ada laporan sesuai filter bobot berdasarkan peran Anda. Coba zoom atau ubah role.")
+                .openOn(map);
+        }
+        document.getElementById('totalSelesai').innerHTML = selesaiCount;
+        document.getElementById('filteredData').innerHTML = tampilDataCount;
+    }
+
+    // INISIALISASI jika sudah login dari localStorage
+    window.onload = () => {
+        const nama = localStorage.getItem('nama');
+        const peran = localStorage.getItem('peran');
+        if(nama && peran) {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            document.getElementById('welcomeText').innerHTML = `Selamat datang, ${nama} 👋`;
+            document.getElementById('roleBadge').innerHTML = `Peran: ${peran}`;
+            loadMapAndFeatures();
+        } else {
+            document.getElementById('loginPage').style.display = 'flex';
+            document.getElementById('dashboard').style.display = 'none';
+        }
+    };
+</script>
+</body>
+</html>
