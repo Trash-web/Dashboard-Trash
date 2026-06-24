@@ -2,1086 +2,638 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trash To Cash - Ubah Sampah Menjadi TrashCoin</title>
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<title>Trash Zero - Sistem Pengelolaan Sampah Digital</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 <style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'Poppins',sans-serif;
-}
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    }
 
-body{
-background:#f5f7fa;
-color:#222;
-overflow-x:hidden;
-}
+    body {
+        background: #0f172a;
+        color: #f1f5f9;
+        overflow-x: hidden;
+    }
 
-/* NAVBAR */
-nav{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-z-index:1000;
-background:rgba(0,0,0,0.85);
-backdrop-filter:blur(10px);
-padding:18px 8%;
-display:flex;
-justify-content:space-between;
-align-items:center;
-}
+    /* LOGIN & CARD STYLE */
+    .page {
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        background: linear-gradient(125deg, #0a0f1e 0%, #0f172a 100%);
+        position: relative;
+    }
 
-.logo{
-font-size:28px;
-font-weight:800;
-color:#4CAF50;
-}
+    .page::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: url('https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?q=80&w=1200&auto=format&fit=crop') center/cover no-repeat;
+        opacity: 0.2;
+        pointer-events: none;
+    }
 
-nav ul{
-display:flex;
-list-style:none;
-gap:30px;
-}
+    .card {
+        width: 100%;
+        max-width: 460px;
+        background: rgba(15, 23, 42, 0.85);
+        backdrop-filter: blur(18px);
+        border-radius: 2rem;
+        padding: 2rem 1.8rem;
+        box-shadow: 0 25px 45px rgba(0, 0, 0, 0.5);
+        border: 1px solid rgba(34, 197, 94, 0.25);
+        transition: all 0.2s;
+    }
 
-nav ul li a{
-text-decoration:none;
-color:white;
-font-weight:500;
-}
+    .logo {
+        font-size: 4rem;
+        text-align: center;
+        margin-bottom: 0.5rem;
+    }
 
-.download-btn{
-background:#ff6b00;
-padding:12px 25px;
-border-radius:50px;
-text-decoration:none;
-color:white;
-font-weight:600;
-}
+    .title {
+        text-align: center;
+        font-size: 2rem;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        background: linear-gradient(135deg, #bef264, #22c55e);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
 
-/* HERO */
-.hero{
-min-height:100vh;
-background:
-linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.55)),
-url("<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Trash To Cash - Ubah Sampah Menjadi TrashCoin</title>
+    .subtitle {
+        text-align: center;
+        opacity: 0.8;
+        margin-bottom: 1.8rem;
+        font-size: 0.85rem;
+    }
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    .input-group {
+        margin-bottom: 1.2rem;
+    }
 
-<style>
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:'Poppins',sans-serif;
-}
+    .input-group label {
+        display: block;
+        margin-bottom: 0.4rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+        letter-spacing: 0.3px;
+    }
 
-body{
-background:#f5f7fa;
-color:#222;
-overflow-x:hidden;
-}
+    .input-group input,
+    .input-group select {
+        width: 100%;
+        padding: 0.9rem 1rem;
+        border: none;
+        border-radius: 1.2rem;
+        background: rgba(255, 255, 255, 0.12);
+        color: white;
+        font-size: 0.95rem;
+        outline: none;
+        transition: 0.2s;
+    }
 
-/* NAVBAR */
-nav{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-z-index:1000;
-background:rgba(0,0,0,0.85);
-backdrop-filter:blur(10px);
-padding:18px 8%;
-display:flex;
-justify-content:space-between;
-align-items:center;
-}
+    .input-group input:focus,
+    .input-group select:focus {
+        background: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 0 0 2px #22c55e;
+    }
 
-.logo{
-font-size:28px;
-font-weight:800;
-color:#4CAF50;
-}
+    .btn {
+        width: 100%;
+        padding: 0.9rem;
+        border: none;
+        border-radius: 2rem;
+        background: linear-gradient(95deg, #22c55e, #15803d);
+        color: white;
+        font-weight: bold;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: 0.2s;
+        margin-top: 0.5rem;
+        box-shadow: 0 6px 14px rgba(34, 197, 94, 0.3);
+    }
 
-nav ul{
-display:flex;
-list-style:none;
-gap:30px;
-}
+    .btn:hover {
+        transform: scale(0.98);
+        background: linear-gradient(95deg, #16a34a, #166534);
+    }
 
-nav ul li a{
-text-decoration:none;
-color:white;
-font-weight:500;
-}
+    .switch {
+        text-align: center;
+        margin-top: 1.3rem;
+        font-size: 0.85rem;
+        color: #86efac;
+        cursor: pointer;
+        font-weight: 500;
+    }
 
-.download-btn{
-background:#ff6b00;
-padding:12px 25px;
-border-radius:50px;
-text-decoration:none;
-color:white;
-font-weight:600;
-}
+    /* DASHBOARD */
+    #dashboard {
+        display: none;
+        background: #0f172a;
+        min-height: 100vh;
+        padding-bottom: 2rem;
+    }
 
-/* HERO */
-.hero{
-min-height:100vh;
-background:
-linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.55)),
-url("https://raw.githubusercontent.com/Trash-web/Dashboard-Trash/refs/heads/main/20b4f030-12ec-4188-ad0a-adc2ca26eb3c%20(1).png");
-background-size:cover;
-background-position:center;
-display:flex;
-align-items:center;
-padding:120px 8%;
-color:white;
-}
+    .topbar {
+        padding: 1rem 1.5rem;
+        background: #0a0f1ecc;
+        backdrop-filter: blur(12px);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: sticky;
+        top: 0;
+        z-index: 1100;
+        border-bottom: 1px solid #22c55e30;
+    }
 
-.hero-content{
-max-width:700px;
-}
+    .topbar h2 {
+        font-size: 1.6rem;
+        background: linear-gradient(120deg, #e2e8f0, #86efac);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
 
-.hero h1{
-font-size:72px;
-line-height:1.1;
-font-weight:800;
-margin-bottom:20px;
-}
+    .logout {
+        background: #dc2626;
+        border: none;
+        padding: 0.5rem 1.2rem;
+        border-radius: 2rem;
+        color: white;
+        font-weight: bold;
+        cursor: pointer;
+        transition: 0.2s;
+    }
 
-.hero p{
-font-size:20px;
-line-height:1.8;
-margin-bottom:35px;
-opacity:.9;
-}
+    .welcome-card {
+        margin: 1.2rem 1.5rem;
+        padding: 1.6rem 1.8rem;
+        border-radius: 2rem;
+        background: linear-gradient(125deg, #1e293b, #0f172a);
+        border-left: 6px solid #22c55e;
+        box-shadow: 0 12px 25px -10px black;
+    }
 
-.hero-buttons{
-display:flex;
-gap:20px;
-flex-wrap:wrap;
-}
+    .role-badge {
+        display: inline-block;
+        background: #22c55e30;
+        padding: 0.3rem 1rem;
+        border-radius: 40px;
+        font-size: 0.75rem;
+        font-weight: bold;
+        margin-top: 0.8rem;
+    }
 
-.btn{
-padding:15px 35px;
-border-radius:50px;
-text-decoration:none;
-font-weight:600;
-}
+    .stats {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        padding: 0 1.5rem 1rem;
+    }
 
-.btn-primary{
-background:#ff6b00;
-color:white;
-}
+    .stat-box {
+        flex: 1;
+        background: #1e293b;
+        padding: 1.2rem;
+        border-radius: 1.6rem;
+        text-align: center;
+        border: 1px solid #334155;
+    }
 
-.btn-secondary{
-border:2px solid white;
-color:white;
-}
+    .stat-box h3 {
+        font-size: 2rem;
+        color: #4ade80;
+    }
 
-/* FLOAT CARD */
-.stats-floating{
-position:absolute;
-right:8%;
-margin-top:180px;
-background:rgba(0,0,0,.65);
-padding:20px;
-border-radius:20px;
-backdrop-filter:blur(15px);
-width:280px;
-}
+    /* FEATURE GRID */
+    .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+        gap: 1.2rem;
+        padding: 0 1.5rem;
+        margin: 1.2rem 0;
+    }
 
-.stats-floating .row{
-display:flex;
-justify-content:space-between;
-padding:15px 0;
-border-bottom:1px solid rgba(255,255,255,.15);
-color:white;
-}
+    .feature-card {
+        background: #111827;
+        border-radius: 1.5rem;
+        padding: 1.3rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 1px solid #2d3a4e;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+    }
 
-.stats-floating .row:last-child{
-border:none;
-}
+    .feature-card:hover {
+        transform: translateY(-4px);
+        background: #1e2a3a;
+        border-color: #22c55e;
+    }
 
-/* ABOUT */
-.about{
-padding:100px 8%;
-background:white;
-text-align:center;
-}
+    .feature-icon {
+        font-size: 2.2rem;
+        margin-bottom: 0.5rem;
+    }
 
-.section-tag{
-display:inline-block;
-padding:10px 20px;
-border-radius:30px;
-background:#ecfdf3;
-color:#4CAF50;
-font-weight:600;
-margin-bottom:20px;
-}
+    .feature-title {
+        font-weight: bold;
+        font-size: 1.1rem;
+        margin: 0.5rem 0 0.2rem;
+        color: #facc15;
+    }
 
-.about h2{
-font-size:42px;
-margin-bottom:20px;
-}
+    .feature-desc {
+        font-size: 0.75rem;
+        opacity: 0.8;
+    }
 
-.about p{
-max-width:850px;
-margin:auto;
-line-height:2;
-font-size:18px;
-color:#666;
-}
+    #map {
+        height: 460px;
+        margin: 1rem 1.5rem;
+        border-radius: 1.8rem;
+        overflow: hidden;
+        border: 2px solid #334155;
+        z-index: 1;
+    }
 
-/* STATISTICS */
-.big-stats{
-padding:100px 8%;
-display:grid;
-grid-template-columns:1.5fr 1fr;
-gap:40px;
-background:#f0f2f5;
-}
+    .legend {
+        padding: 0 1.5rem;
+        margin-top: 0.5rem;
+    }
 
-.big-number{
-font-size:110px;
-font-weight:800;
-color:#111;
-}
+    .legend-title {
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
 
-.big-number span{
-color:#4CAF50;
-}
+    .legend-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        margin-right: 1.5rem;
+        margin-bottom: 0.5rem;
+    }
 
-.right-stats{
-display:grid;
-gap:25px;
-}
+    .dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+    }
 
-.stat-box{
-background:white;
-padding:30px;
-border-radius:20px;
-box-shadow:0 10px 30px rgba(0,0,0,.08);
-}
+    .pending { background: #f97316; }
+    .process { background: #3b82f6; }
+    .done { background: #22c55e; }
 
-.stat-box h3{
-font-size:42px;
-color:#4CAF50;
-}
+    .flash {
+        position: fixed;
+        top: 18px;
+        right: 20px;
+        background: #22c55e;
+        color: #0c0e1a;
+        font-weight: bold;
+        padding: 14px 24px;
+        border-radius: 60px;
+        z-index: 9999;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        animation: fadeSlide 0.3s ease;
+    }
 
-/* FEATURES */
-.features{
-padding:100px 8%;
-background:white;
-}
+    @keyframes fadeSlide {
+        from { opacity: 0; transform: translateX(40px);}
+        to { opacity: 1; transform: translateX(0);}
+    }
 
-.features-title{
-text-align:center;
-margin-bottom:60px;
-}
-
-.features-title h2{
-font-size:42px;
-}
-
-.cards{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-gap:30px;
-}
-
-.card{
-background:white;
-border-radius:25px;
-overflow:hidden;
-box-shadow:0 10px 30px rgba(0,0,0,.08);
-transition:.3s;
-}
-
-.card:hover{
-transform:translateY(-10px);
-}
-
-.card img{
-width:100%;
-height:220px;
-object-fit:cover;
-}
-
-.card-content{
-padding:25px;
-}
-
-.card h3{
-margin-bottom:10px;
-}
-
-/* HOW */
-.how{
-padding:100px 8%;
-background:#111;
-color:white;
-}
-
-.steps{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-gap:30px;
-margin-top:50px;
-}
-
-.step{
-background:#1c1c1c;
-padding:35px;
-border-radius:25px;
-}
-
-.step-number{
-font-size:60px;
-font-weight:800;
-color:#4CAF50;
-}
-
-/* CTA */
-.cta{
-padding:120px 8%;
-text-align:center;
-background:linear-gradient(135deg,#4CAF50,#0f9d58);
-color:white;
-}
-
-.cta h2{
-font-size:52px;
-margin-bottom:20px;
-}
-
-.cta p{
-font-size:20px;
-max-width:800px;
-margin:auto auto 40px;
-}
-
-.cta a{
-background:white;
-color:#4CAF50;
-padding:18px 40px;
-border-radius:50px;
-text-decoration:none;
-font-weight:700;
-font-size:18px;
-}
-
-/* FOOTER */
-footer{
-background:#000;
-color:#aaa;
-padding:40px;
-text-align:center;
-}
-
-@media(max-width:768px){
-
-.hero h1{
-font-size:48px;
-}
-
-.big-stats{
-grid-template-columns:1fr;
-}
-
-.big-number{
-font-size:70px;
-}
-
-.stats-floating{
-display:none;
-}
-
-}
+    @media (max-width: 640px) {
+        .stats { flex-direction: column; }
+        .feature-grid { grid-template-columns: 1fr; }
+    }
 </style>
 </head>
 <body>
 
-<nav>
-<div class="logo">TRASH TO CASH</div>
+<!-- LOGIN PAGE -->
+<div class="page" id="loginPage">
+    <div class="card">
+        <div class="logo">♻️🗑️</div>
+        <div class="title">Trash Zero</div>
+        <div class="subtitle">Sistem pelaporan & monitoring sampah berbasis smart location</div>
 
-<ul>
-<li><a href="#">Home</a></li>
-<li><a href="#">Fitur</a></li>
-<li><a href="#">TrashCoin</a></li>
-<li><a href="#">Tentang</a></li>
-</ul>
+        <div id="loginBox">
+            <div class="input-group"><label>📱 Nomor HP</label><input type="text" id="loginHP" placeholder="08xxxxxxxxxx"></div>
+            <div class="input-group"><label>🔒 Password</label><input type="password" id="loginPassword"></div>
+            <div class="input-group"><label>👥 Peran</label>
+                <select id="loginPeran">
+                    <option>Warga</option><option>Kepala Desa</option><option>Dinas Lingkungan Hidup</option>
+                </select>
+            </div>
+            <button class="btn" onclick="login()">🚀 MASUK KE DASHBOARD</button>
+            <div class="switch" onclick="toggleRegister()">✨ Belum punya akun? Registrasi Sekarang</div>
+        </div>
 
-<a href="https://trash-web.github.io/Trash-To-Cash/"
-target="_blank"
-class="download-btn">
-Download App
-</a>
-</nav>
-
-<section class="hero">
-
-<div class="hero-content">
-<h1>UBAH SAMPAH MENJADI TRASHCOIN</h1>
-
-<p>
-Platform ekonomi sirkular digital yang mengubah sampah
-plastik, kertas, logam dan kaca menjadi aset digital
-berupa <b>TrashCoin</b>. Menabung sampah, menjaga lingkungan,
-dan menghasilkan uang dalam satu aplikasi.
-</p>
-
-<div class="hero-buttons">
-<a href="https://trash-web.github.io/Trash-To-Cash/" class="btn btn-primary">
-Download Aplikasi
-</a>
-
-<a href="#fitur" class="btn btn-secondary">
-Pelajari Lebih Lanjut
-</a>
-</div>
+        <div id="registerBox" style="display:none;">
+            <div class="input-group"><label>📞 Nomor HP</label><input type="text" id="regHP"></div>
+            <div class="input-group"><label>🧑 Nama Lengkap</label><input type="text" id="regNama"></div>
+            <div class="input-group"><label>🔐 Password</label><input type="password" id="regPassword"></div>
+            <div class="input-group"><label>👔 Peran</label><select id="regPeran"><option>Warga</option><option>Kepala Desa</option><option>Dinas Lingkungan Hidup</option></select></div>
+            <button class="btn" onclick="register()">📝 DAFTAR</button>
+            <div class="switch" onclick="toggleRegister()">↩️ Sudah punya akun? Login</div>
+        </div>
+    </div>
 </div>
 
-<div class="stats-floating">
-<div class="row">
-<span>Sampah Terkelola</span>
-<strong>250K+ Kg</strong>
+<!-- DASHBOARD UTAMA -->
+<div id="dashboard">
+    <div class="topbar">
+        <h2>♻️ Trash Zero | Smart Waste</h2>
+        <button class="logout" onclick="logout()">🚪 Keluar</button>
+    </div>
+    <div class="welcome-card">
+        <h2 id="welcomeText"></h2>
+        <p>🗺️ Laporan realtime, pantau titik sampah & aksi pengangkutan.</p>
+        <div class="role-badge" id="roleBadge"></div>
+    </div>
+    <div class="stats">
+        <div class="stat-box"><h3 id="totalLaporan">0</h3><p>Total Laporan</p></div>
+        <div class="stat-box"><h3 id="totalSelesai">0</h3><p>Selesai</p></div>
+        <div class="stat-box"><h3 id="filteredData">0</h3><p>Tampil Peta</p></div>
+    </div>
+
+    <!-- DYNAMIC FITUR GRID (BERDASARKAN PERAN) -->
+    <div id="featureContainer" class="feature-grid"></div>
+
+    <div id="map"></div>
+    <div class="legend">
+        <div class="legend-title">📌 Status titik sampah</div>
+        <div><span class="dot pending"></span> Pending   <span class="dot process"></span> Diproses   <span class="dot done"></span> Selesai</div>
+    </div>
 </div>
 
-<div class="row">
-<span>Pengguna Aktif</span>
-<strong>15.000+</strong>
-</div>
-
-<div class="row">
-<span>Kepuasan Pengguna</span>
-<strong>98%</strong>
-</div>
-</div>
-
-</section>
-
-<section class="about">
-
-<div class="section-tag">TENTANG TRASH TO CASH</div>
-
-<h2>Masa Depan Pengelolaan Sampah Digital</h2>
-
-<p>
-Trash To Cash hadir untuk membantu masyarakat mengubah
-sampah menjadi nilai ekonomi melalui sistem poin digital
-bernama TrashCoin. Setiap sampah yang disetorkan akan
-ditimbang, diverifikasi, dan dikonversi menjadi saldo
-digital yang dapat ditukar menjadi uang, voucher,
-atau hadiah menarik.
-</p>
-
-</section>
-
-<section class="big-stats">
-
-<div>
-<div class="big-number">1.2M <span>Kg</span></div>
-<p>
-Total sampah yang berhasil didaur ulang dan
-dikonversi menjadi nilai ekonomi bagi masyarakat.
-</p>
-</div>
-
-<div class="right-stats">
-
-<div class="stat-box">
-<h3>20+</h3>
-<p>Bank Sampah Mitra</p>
-</div>
-
-<div class="stat-box">
-<h3>95+</h3>
-<p>Komunitas Lingkungan</p>
-</div>
-
-<div class="stat-box">
-<h3>1000+</h3>
-<p>Transaksi TrashCoin Harian</p>
-</div>
-
-</div>
-</section>
-
-<section class="features" id="fitur">
-
-<div class="features-title">
-<div class="section-tag">FITUR UTAMA</div>
-<h2>Ekosistem TrashCoin</h2>
-</div>
-
-<div class="cards">
-
-<div class="card">
-<img src="https://images.unsplash.com/photo-1532996122724-e3c354a0b15b">
-<div class="card-content">
-<h3>Setor Sampah</h3>
-<p>Sampah ditimbang dan diverifikasi secara digital.</p>
-</div>
-</div>
-
-<div class="card">
-<img src="https://images.unsplash.com/photo-1604187351574-c75ca79f5807">
-<div class="card-content">
-<h3>Dapatkan TrashCoin</h3>
-<p>Setiap kilogram sampah dikonversi menjadi coin.</p>
-</div>
-</div>
-
-<div class="card">
-<img src="https://images.unsplash.com/photo-1611284446314-60a58ac0deb9">
-<div class="card-content">
-<h3>Tukar Menjadi Uang</h3>
-<p>Coin dapat ditukar menjadi saldo digital atau hadiah.</p>
-</div>
-</div>
-
-</div>
-</section>
-
-<section class="how">
-
-<center>
-<div class="section-tag">CARA KERJA</div>
-<h2>4 Langkah Menjadi Pahlawan Lingkungan</h2>
-</center>
-
-<div class="steps">
-
-<div class="step">
-<div class="step-number">1</div>
-<h3>Download Aplikasi</h3>
-<p>Instal aplikasi Trash To Cash.</p>
-</div>
-
-<div class="step">
-<div class="step-number">2</div>
-<h3>Pilah Sampah</h3>
-<p>Kelompokkan berdasarkan jenis material.</p>
-</div>
-
-<div class="step">
-<div class="step-number">3</div>
-<h3>Setor Sampah</h3>
-<p>Kirim ke bank sampah atau titik pengumpulan.</p>
-</div>
-
-<div class="step">
-<div class="step-number">4</div>
-<h3>Dapatkan TrashCoin</h3>
-<p>Coin otomatis masuk ke akun pengguna.</p>
-</div>
-
-</div>
-
-</section>
-
-<section class="cta">
-
-<h2>Mulai Menghasilkan dari Sampah Hari Ini</h2>
-
-<p>
-Gabung bersama ribuan pengguna yang telah mengubah
-sampah menjadi penghasilan dan membantu menciptakan
-lingkungan yang lebih bersih.
-</p>
-
-<a href="https://trash-web.github.io/Trash-To-Cash/" target="_blank">
-DOWNLOAD SEKARANG
-</a>
-
-</section>
-
-<footer>
-© 2026 Trash To Cash | Waste to Wealth Platform
-</footer>
-
-</body>
-</html>");
-background-size:cover;
-background-position:center;
-display:flex;
-align-items:center;
-padding:120px 8%;
-color:white;
-}
-
-.hero-content{
-max-width:700px;
-}
-
-.hero h1{
-font-size:72px;
-line-height:1.1;
-font-weight:800;
-margin-bottom:20px;
-}
-
-.hero p{
-font-size:20px;
-line-height:1.8;
-margin-bottom:35px;
-opacity:.9;
-}
-
-.hero-buttons{
-display:flex;
-gap:20px;
-flex-wrap:wrap;
-}
-
-.btn{
-padding:15px 35px;
-border-radius:50px;
-text-decoration:none;
-font-weight:600;
-}
-
-.btn-primary{
-background:#ff6b00;
-color:white;
-}
-
-.btn-secondary{
-border:2px solid white;
-color:white;
-}
-
-/* FLOAT CARD */
-.stats-floating{
-position:absolute;
-right:8%;
-margin-top:180px;
-background:rgba(0,0,0,.65);
-padding:20px;
-border-radius:20px;
-backdrop-filter:blur(15px);
-width:280px;
-}
-
-.stats-floating .row{
-display:flex;
-justify-content:space-between;
-padding:15px 0;
-border-bottom:1px solid rgba(255,255,255,.15);
-color:white;
-}
-
-.stats-floating .row:last-child{
-border:none;
-}
-
-/* ABOUT */
-.about{
-padding:100px 8%;
-background:white;
-text-align:center;
-}
-
-.section-tag{
-display:inline-block;
-padding:10px 20px;
-border-radius:30px;
-background:#ecfdf3;
-color:#4CAF50;
-font-weight:600;
-margin-bottom:20px;
-}
-
-.about h2{
-font-size:42px;
-margin-bottom:20px;
-}
-
-.about p{
-max-width:850px;
-margin:auto;
-line-height:2;
-font-size:18px;
-color:#666;
-}
-
-/* STATISTICS */
-.big-stats{
-padding:100px 8%;
-display:grid;
-grid-template-columns:1.5fr 1fr;
-gap:40px;
-background:#f0f2f5;
-}
-
-.big-number{
-font-size:110px;
-font-weight:800;
-color:#111;
-}
-
-.big-number span{
-color:#4CAF50;
-}
-
-.right-stats{
-display:grid;
-gap:25px;
-}
-
-.stat-box{
-background:white;
-padding:30px;
-border-radius:20px;
-box-shadow:0 10px 30px rgba(0,0,0,.08);
-}
-
-.stat-box h3{
-font-size:42px;
-color:#4CAF50;
-}
-
-/* FEATURES */
-.features{
-padding:100px 8%;
-background:white;
-}
-
-.features-title{
-text-align:center;
-margin-bottom:60px;
-}
-
-.features-title h2{
-font-size:42px;
-}
-
-.cards{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-gap:30px;
-}
-
-.card{
-background:white;
-border-radius:25px;
-overflow:hidden;
-box-shadow:0 10px 30px rgba(0,0,0,.08);
-transition:.3s;
-}
-
-.card:hover{
-transform:translateY(-10px);
-}
-
-.card img{
-width:100%;
-height:220px;
-object-fit:cover;
-}
-
-.card-content{
-padding:25px;
-}
-
-.card h3{
-margin-bottom:10px;
-}
-
-/* HOW */
-.how{
-padding:100px 8%;
-background:#111;
-color:white;
-}
-
-.steps{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-gap:30px;
-margin-top:50px;
-}
-
-.step{
-background:#1c1c1c;
-padding:35px;
-border-radius:25px;
-}
-
-.step-number{
-font-size:60px;
-font-weight:800;
-color:#4CAF50;
-}
-
-/* CTA */
-.cta{
-padding:120px 8%;
-text-align:center;
-background:linear-gradient(135deg,#4CAF50,#0f9d58);
-color:white;
-}
-
-.cta h2{
-font-size:52px;
-margin-bottom:20px;
-}
-
-.cta p{
-font-size:20px;
-max-width:800px;
-margin:auto auto 40px;
-}
-
-.cta a{
-background:white;
-color:#4CAF50;
-padding:18px 40px;
-border-radius:50px;
-text-decoration:none;
-font-weight:700;
-font-size:18px;
-}
-
-/* FOOTER */
-footer{
-background:#000;
-color:#aaa;
-padding:40px;
-text-align:center;
-}
-
-@media(max-width:768px){
-
-.hero h1{
-font-size:48px;
-}
-
-.big-stats{
-grid-template-columns:1fr;
-}
-
-.big-number{
-font-size:70px;
-}
-
-.stats-floating{
-display:none;
-}
-
-}
-</style>
-</head>
-<body>
-
-<nav>
-<div class="logo">TRASH TO CASH</div>
-
-<ul>
-<li><a href="#">Home</a></li>
-<li><a href="#">Fitur</a></li>
-<li><a href="#">TrashCoin</a></li>
-<li><a href="#">Tentang</a></li>
-</ul>
-
-<a href="https://trash-web.github.io/Trash-To-Cash/"
-target="_blank"
-class="download-btn">
-Download App
-</a>
-</nav>
-
-<section class="hero">
-
-<div class="hero-content">
-<h1>UBAH SAMPAH MENJADI TRASHCOIN</h1>
-
-<p>
-Platform ekonomi sirkular digital yang mengubah sampah
-plastik, kertas, logam dan kaca menjadi aset digital
-berupa <b>TrashCoin</b>. Menabung sampah, menjaga lingkungan,
-dan menghasilkan uang dalam satu aplikasi.
-</p>
-
-<div class="hero-buttons">
-<a href="https://trash-web.github.io/Trash-To-Cash/" class="btn btn-primary">
-Download Aplikasi
-</a>
-
-<a href="#fitur" class="btn btn-secondary">
-Pelajari Lebih Lanjut
-</a>
-</div>
-</div>
-
-<div class="stats-floating">
-<div class="row">
-<span>Sampah Terkelola</span>
-<strong>250K+ Kg</strong>
-</div>
-
-<div class="row">
-<span>Pengguna Aktif</span>
-<strong>15.000+</strong>
-</div>
-
-<div class="row">
-<span>Kepuasan Pengguna</span>
-<strong>98%</strong>
-</div>
-</div>
-
-</section>
-
-<section class="about">
-
-<div class="section-tag">TENTANG TRASH TO CASH</div>
-
-<h2>Masa Depan Pengelolaan Sampah Digital</h2>
-
-<p>
-Trash To Cash hadir untuk membantu masyarakat mengubah
-sampah menjadi nilai ekonomi melalui sistem poin digital
-bernama TrashCoin. Setiap sampah yang disetorkan akan
-ditimbang, diverifikasi, dan dikonversi menjadi saldo
-digital yang dapat ditukar menjadi uang, voucher,
-atau hadiah menarik.
-</p>
-
-</section>
-
-<section class="big-stats">
-
-<div>
-<div class="big-number">1.2M <span>Kg</span></div>
-<p>
-Total sampah yang berhasil didaur ulang dan
-dikonversi menjadi nilai ekonomi bagi masyarakat.
-</p>
-</div>
-
-<div class="right-stats">
-
-<div class="stat-box">
-<h3>20+</h3>
-<p>Bank Sampah Mitra</p>
-</div>
-
-<div class="stat-box">
-<h3>95+</h3>
-<p>Komunitas Lingkungan</p>
-</div>
-
-<div class="stat-box">
-<h3>1000+</h3>
-<p>Transaksi TrashCoin Harian</p>
-</div>
-
-</div>
-</section>
-
-<section class="features" id="fitur">
-
-<div class="features-title">
-<div class="section-tag">FITUR UTAMA</div>
-<h2>Ekosistem TrashCoin</h2>
-</div>
-
-<div class="cards">
-
-<div class="card">
-<img src="https://images.unsplash.com/photo-1532996122724-e3c354a0b15b">
-<div class="card-content">
-<h3>Setor Sampah</h3>
-<p>Sampah ditimbang dan diverifikasi secara digital.</p>
-</div>
-</div>
-
-<div class="card">
-<img src="https://images.unsplash.com/photo-1604187351574-c75ca79f5807">
-<div class="card-content">
-<h3>Dapatkan TrashCoin</h3>
-<p>Setiap kilogram sampah dikonversi menjadi coin.</p>
-</div>
-</div>
-
-<div class="card">
-<img src="https://images.unsplash.com/photo-1611284446314-60a58ac0deb9">
-<div class="card-content">
-<h3>Tukar Menjadi Uang</h3>
-<p>Coin dapat ditukar menjadi saldo digital atau hadiah.</p>
-</div>
-</div>
-
-</div>
-</section>
-
-<section class="how">
-
-<center>
-<div class="section-tag">CARA KERJA</div>
-<h2>4 Langkah Menjadi Pahlawan Lingkungan</h2>
-</center>
-
-<div class="steps">
-
-<div class="step">
-<div class="step-number">1</div>
-<h3>Download Aplikasi</h3>
-<p>Instal aplikasi Trash To Cash.</p>
-</div>
-
-<div class="step">
-<div class="step-number">2</div>
-<h3>Pilah Sampah</h3>
-<p>Kelompokkan berdasarkan jenis material.</p>
-</div>
-
-<div class="step">
-<div class="step-number">3</div>
-<h3>Setor Sampah</h3>
-<p>Kirim ke bank sampah atau titik pengumpulan.</p>
-</div>
-
-<div class="step">
-<div class="step-number">4</div>
-<h3>Dapatkan TrashCoin</h3>
-<p>Coin otomatis masuk ke akun pengguna.</p>
-</div>
-
-</div>
-
-</section>
-
-<section class="cta">
-
-<h2>Mulai Menghasilkan dari Sampah Hari Ini</h2>
-
-<p>
-Gabung bersama ribuan pengguna yang telah mengubah
-sampah menjadi penghasilan dan membantu menciptakan
-lingkungan yang lebih bersih.
-</p>
-
-<a href="https://trash-web.github.io/Trash-To-Cash/" target="_blank">
-DOWNLOAD SEKARANG
-</a>
-
-</section>
-
-<footer>
-© 2026 Trash To Cash | Waste to Wealth Platform
-</footer>
-
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+    // ---------- Google Script Endpoint (Login/Regis mock, tapi tetap terintegrasi) ----------
+    const LOGIN_SCRIPT = "https://script.google.com/macros/s/AKfycbz_ixSVZWbh6G_8K4tyjiv1mgpgMLJMMeFimDsBm-p0m75N-5rOwV_pbcCxP4QMnRqU/exec";
+    const SHEET_JSON = "https://opensheet.elk.sh/16Uecp8DHNWQy5XBHyAjdFZkNFWjRLaLk6z3hiOzZuAo/Sheet1";
+
+    // Data simulasi user lokal (untuk keperluan demo cepat, jika endpoint gagal tetap bisa regist/login dasar)
+    let localUsers = JSON.parse(localStorage.getItem("trashzero_localusers")) || [];
+
+    function toggleRegister() {
+        const loginDiv = document.getElementById('loginBox');
+        const regDiv = document.getElementById('registerBox');
+        if (loginDiv.style.display !== 'none') {
+            loginDiv.style.display = 'none';
+            regDiv.style.display = 'block';
+        } else {
+            loginDiv.style.display = 'block';
+            regDiv.style.display = 'none';
+        }
+    }
+
+    async function register() {
+        const hp = document.getElementById('regHP').value.trim();
+        const nama = document.getElementById('regNama').value.trim();
+        const pass = document.getElementById('regPassword').value.trim();
+        const peran = document.getElementById('regPeran').value;
+        if(!hp || !nama || !pass) { showFlash("❌ Isi semua data!", true); return; }
+        // cek duplikat lokal
+        if(localUsers.find(u => u.nomorHP === hp)) { showFlash("❌ Nomor HP sudah terdaftar", true); return; }
+        const newUser = { nomorHP: hp, namaLengkap: nama, password: pass, peran: peran };
+        localUsers.push(newUser);
+        localStorage.setItem("trashzero_localusers", JSON.stringify(localUsers));
+        showFlash("✅ Registrasi berhasil! Silakan login.");
+        toggleRegister(); // pindah ke login
+        document.getElementById('regHP').value = '';
+        document.getElementById('regNama').value = '';
+        document.getElementById('regPassword').value = '';
+    }
+
+    async function login() {
+        const hp = document.getElementById('loginHP').value.trim();
+        const pass = document.getElementById('loginPassword').value.trim();
+        const peran = document.getElementById('loginPeran').value;
+        if(!hp || !pass) { showFlash("⚠️ Masukkan HP & Password", true); return; }
+
+        // coba ke google script dulu (opsional, biar tetap ada integrasi)
+        let success = false;
+        let userName = "";
+        try {
+            const response = await fetch(LOGIN_SCRIPT, {
+                method: 'POST',
+                body: JSON.stringify({ action: 'login', nomorHP: hp, password: pass, peran: peran })
+            });
+            const result = await response.json();
+            if(result.status === 'success') {
+                success = true;
+                userName = result.nama;
+            }
+        } catch(e) { console.log("remote login skip, pakai lokal"); }
+
+        // Jika remote gagal, cek localUsers
+        if(!success) {
+            const found = localUsers.find(u => u.nomorHP === hp && u.password === pass && u.peran === peran);
+            if(found) {
+                success = true;
+                userName = found.namaLengkap;
+            }
+        }
+
+        if(success) {
+            localStorage.setItem('nama', userName);
+            localStorage.setItem('peran', peran);
+            localStorage.setItem('login_hp', hp);
+            showFlash(`🎉 Selamat datang, ${userName} (${peran})`);
+            setTimeout(() => {
+                document.getElementById('loginPage').style.display = 'none';
+                document.getElementById('dashboard').style.display = 'block';
+                document.getElementById('welcomeText').innerHTML = `Selamat datang, ${userName} 👋`;
+                document.getElementById('roleBadge').innerHTML = `Peran: ${peran}`;
+                loadMapAndFeatures();
+            }, 800);
+        } else {
+            showFlash("❌ Login gagal! Periksa HP/password/peran", true);
+        }
+    }
+
+    function logout() {
+        localStorage.clear();
+        location.reload();
+    }
+
+    function showFlash(msg, isError = false) {
+        const flashDiv = document.createElement('div');
+        flashDiv.className = 'flash';
+        flashDiv.style.background = isError ? '#dc2626' : '#22c55e';
+        flashDiv.style.color = 'white';
+        flashDiv.innerHTML = msg;
+        document.body.appendChild(flashDiv);
+        setTimeout(() => flashDiv.remove(), 2800);
+    }
+
+    // ======================= MENU DINAMIS BERDASARKAN PERAN =======================
+    function getFeaturesByRole(role) {
+        // Fitur dengan link sesuai permintaan
+        const allFeatures = {
+            // WAJIB ADA UNTUK WARGA
+            "Warga": [
+                { name: "📋 Pelaporan Sampah", desc: "Laporkan titik sampah baru", url: "https://trash-web.github.io/Input-laporan-sampah/", icon: "🗑️" },
+                { name: "⭐ Resik-Points", desc: "Tukar poin kebersihan", url: "https://www.historia.id/article/enam-korban-keris-mpu-gandring-dpo91", icon: "🎁" },
+                { name: "🤖 AI-Based Waste Classification", desc: "Klasifikasi sampah pintar", url: "https://trash-web.github.io/Ai-Trash/", icon: "🧠" },
+                { name: "🚛 Pelacakan Truk Live", desc: "Lacak armada pengangkut", url: "https://trash-web.github.io/Truck-Live/", icon: "📍" }
+            ],
+            "Kepala Desa": [
+                { name: "🚛 Pelacakan Truk Live", desc: "Monitoring truk sampah", url: "https://trash-web.github.io/Truck-Live/", icon: "🚛" },
+                { name: "⚡ Smart Routing Optimization", desc: "Optimasi rute pengangkutan", url: "https://trash-web.github.io/Smart-Truck/", icon: "🧭" },
+                { name: "📈 Progress Laporan", desc: "Lihat progress desa", url: "https://www.historia.id/articles/categories/olahraga", icon: "📊" }
+            ],
+            "Dinas Lingkungan Hidup": [
+                { name: "🚛 Pelacakan Truk Live", desc: "Full fleet monitoring", url: "https://trash-web.github.io/Truck-Live/", icon: "🚛" },
+                { name: "⚡ Smart Routing Optimization", desc: "Rute dinamis dinas", url: "https://trash-web.github.io/Smart-Truck/", icon: "⚙️" },
+                { name: "📑 Progress Laporan", desc: "Statistik wilayah", url: "https://www.historia.id/articles/categories/olahraga", icon: "📈" }
+            ]
+        };
+        if(role === "Kepala Desa") return allFeatures["Kepala Desa"];
+        if(role === "Dinas Lingkungan Hidup") return allFeatures["Dinas Lingkungan Hidup"];
+        return allFeatures["Warga"];
+    }
+
+    function renderFeatureButtons(role) {
+        const container = document.getElementById('featureContainer');
+        if(!container) return;
+        const features = getFeaturesByRole(role);
+        container.innerHTML = "";
+        features.forEach(f => {
+            const card = document.createElement('div');
+            card.className = 'feature-card';
+            card.onclick = () => { window.open(f.url, '_blank'); };
+            card.innerHTML = `
+                <div class="feature-icon">${f.icon}</div>
+                <div class="feature-title">${f.name}</div>
+                <div class="feature-desc">${f.desc}</div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    // ======================= LOAD MAP DAN DATA GOOGLE SHEET =======================
+    let currentMap = null;
+
+    async function loadMapAndFeatures() {
+        const role = localStorage.getItem('peran');
+        if(!role) return;
+
+        // render tombol fitur dinamis
+        renderFeatureButtons(role);
+
+        // init map (jika sudah ada, remove)
+        if(currentMap) {
+            currentMap.remove();
+        }
+        const map = L.map('map').setView([-7.9, 112.6], 10);
+        currentMap = map;
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        let data = [];
+        try {
+            const resp = await fetch(SHEET_JSON);
+            data = await resp.json();
+        } catch(e) {
+            console.warn("gagal fetch sheet, gunakan data dummy");
+            data = [];
+        }
+
+        document.getElementById('totalLaporan').innerHTML = data.length;
+        let selesaiCount = 0;
+        let tampilDataCount = 0;
+
+        for(let item of data) {
+            const lat = parseFloat(item.Latitude);
+            const lng = parseFloat(item.Longitude);
+            if(isNaN(lat) || isNaN(lng)) continue;
+            const berat = parseFloat(item.Perkiraan_Berat_Kg) || 0;
+            let showMarker = false;
+
+            // Filter sesuai role (berat: KepalaDesa 100-900, DLH >=900, warga semua)
+            if(role === "Warga") {
+                showMarker = true;
+            } else if(role === "Kepala Desa") {
+                if(berat >= 100 && berat <= 900) showMarker = true;
+            } else if(role === "Dinas Lingkungan Hidup") {
+                if(berat >= 900) showMarker = true;
+            }
+
+            if(!showMarker) continue;
+            tampilDataCount++;
+            let markerColor = '#f97316'; // orange pending
+            const status = item.Status;
+            if(status === 'Diproses') markerColor = '#3b82f6';
+            if(status === 'Selesai') {
+                markerColor = '#22c55e';
+                selesaiCount++;
+            }
+
+            const circle = L.circleMarker([lat, lng], {
+                radius: 9,
+                fillColor: markerColor,
+                color: '#ffffff',
+                weight: 1.8,
+                fillOpacity: 0.85
+            }).addTo(map);
+
+            const popupHtml = `
+                <div style="font-family:sans; min-width:180px;">
+                    <strong>🧾 ${item.Kategori_Sampah || 'Sampah'}</strong><br>
+                    🆔 ID: ${item.ID_Laporan || '-'}<br>
+                    👤 Pelapor: ${item.Nama_Pelapor || '-'}<br>
+                    ⚖️ Berat: ${item.Perkiraan_Berat_Kg} kg<br>
+                    📌 Status: ${item.Status || 'Pending'}<br>
+                    💬 Komentar: ${item.Komentar_Petugas || '-'}<br>
+                    📞 No HP: ${item.Nomor_Handphone || '-'}
+                </div>
+            `;
+            circle.bindPopup(popupHtml);
+        }
+
+        if(tampilDataCount === 0 && data.length > 0) {
+            // kalau tidak ada marker karena filter berat
+            const infoLayer = L.tileLayer('').addTo(map);
+            map.setView([-7.5, 112.2], 8);
+            L.popup()
+                .setLatLng([-7.9,112.6])
+                .setContent("⚠️ Tidak ada laporan sesuai filter bobot berdasarkan peran Anda. Coba zoom atau ubah role.")
+                .openOn(map);
+        }
+        document.getElementById('totalSelesai').innerHTML = selesaiCount;
+        document.getElementById('filteredData').innerHTML = tampilDataCount;
+    }
+
+    // INISIALISASI jika sudah login dari localStorage
+    window.onload = () => {
+        const nama = localStorage.getItem('nama');
+        const peran = localStorage.getItem('peran');
+        if(nama && peran) {
+            document.getElementById('loginPage').style.display = 'none';
+            document.getElementById('dashboard').style.display = 'block';
+            document.getElementById('welcomeText').innerHTML = `Selamat datang, ${nama} 👋`;
+            document.getElementById('roleBadge').innerHTML = `Peran: ${peran}`;
+            loadMapAndFeatures();
+        } else {
+            document.getElementById('loginPage').style.display = 'flex';
+            document.getElementById('dashboard').style.display = 'none';
+        }
+    };
+</script>
 </body>
 </html>
